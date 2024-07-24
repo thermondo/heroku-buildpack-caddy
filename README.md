@@ -14,7 +14,7 @@ heroku buildpacks:add https://github.com/thermondo/heroku-buildpack-caddy/releas
 
 🚨 _It's highly recommended that you use the **release tarball** URL instead of the GitHub repo URL._
 
-Then in your app's [Profile](https://devcenter.heroku.com/articles/procfile) add something like this:
+Then in your app's [Procfile](https://devcenter.heroku.com/articles/procfile) add something like this:
 
 ```plaintext
 web: ./caddy/bin/caddy --config <your Caddyfile>
