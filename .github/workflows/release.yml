@@ -1,0 +1,23 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag you want to assign to the release"
+        required: true
+        default: "v0.0.0"
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_TAG: "${{ inputs.tag }}"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create draft release
+      run: ./.github/workflows/create-release.sh
