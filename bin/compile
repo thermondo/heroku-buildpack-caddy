@@ -75,13 +75,14 @@ main() {
 
     step "Extracting Caddy..."
     layer_dir="${BUILD_DIR}/caddy"
-    mkdir --parent "${layer_dir}"
+    bin_dir="${layer_dir}/bin"
+    mkdir --parent "${bin_dir}"
     (
         umask ugo=r
-        tar --extract --gzip --to-stdout --file "${download_path}" "caddy" > "${layer_dir}/caddy"
+        tar --extract --gzip --to-stdout --file "${download_path}" "caddy" > "${bin_dir}/caddy"
     )
-    chmod +x "${layer_dir}/caddy"
-    "${layer_dir}/caddy" --version | indent
+    chmod +x "${bin_dir}/caddy"
+    "${bin_dir}/caddy" --version | indent
 }
 
 main
