@@ -62,12 +62,12 @@ main() {
         case "${latest_tag}" in
             v2.*)
                 info "Caddy version: ${latest_tag}"
-            ;;
+                ;;
             *)
                 info "Expected caddy version 2.x -- got ${latest_tag}"
                 latest_tag="$(github_latest_vx_tag caddyserver caddy v2)"
                 info "Falling back to latest 2.x release: ${latest_tag}"
-            ;;
+                ;;
         esac
     else
         latest_tag="${CADDY_RELEASE}"
