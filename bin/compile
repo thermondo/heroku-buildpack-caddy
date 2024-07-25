@@ -30,6 +30,8 @@ curl_download() {
         --silent \
         --show-error \
         --fail \
+        --header "Accept: application/vnd.github+json" \
+        --header "X-GitHub-Api-Version: 2022-11-28" \
         --location "${url}"
 }
 
