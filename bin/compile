@@ -40,6 +40,15 @@ github_latest_tag() {
         | grep --perl-regexp --only-matching '(?<="tag_name": ")(\S+)(?=")'
 }
 
+github_latest_vx_tag() {
+    local owner="${1}"
+    local repo="${2}"
+    local prefix="${3}"
+    curl_download "https://api.github.com/repos/${owner}/${repo}/releases" \
+        | jq --raw-output --arg prefix "${prefix}" \
+            'map(select((.prerelease | not) and (.draft | not) and (.tag_name | startswith($prefix)))) | max_by(.tag_name) | .tag_name'
+}
+
 main() {
     local latest_tag latest_version download_path layer_dir caddy_url
 
@@ -53,7 +62,9 @@ main() {
                 info "Caddy version: ${latest_tag}"
             ;;
             *)
-                panic "Expected caddy version 2.x -- got ${latest_tag}"
+                info "Expected caddy version 2.x -- got ${latest_tag}"
+                latest_tag="$(github_latest_vx_tag caddyserver caddy v2)"
+                info "Falling back to latest 2.x release: ${latest_tag}"
             ;;
         esac
     else
