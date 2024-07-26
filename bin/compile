@@ -87,7 +87,7 @@ EOF
     fi
 
     step "Extracting Caddy..."
-    layer_dir="${BUILD_DIR}/caddy"
+    layer_dir="${BUILD_DIR}/.caddy"
     bin_dir="${layer_dir}/bin"
     mkdir --parent "${bin_dir}"
     (
