@@ -53,7 +53,20 @@ main() {
                 info "Caddy version: ${latest_tag}"
             ;;
             *)
-                panic "Expected caddy version 2.x -- got ${latest_tag}"
+                indent <<EOF
+-------------------------------------------------------------------
+Expected Caddy v2.x -- got ${latest_tag}.
+Rather that installing / running new major versions automatically,
+we're going to abort so you have an opportunity to test first. You
+can override this behavior by pinning the version you want with
+the CADDY_RELEASE environment variable. Also check...
+
+    https://github.com/thermondo/heroku-buildpack-caddy/
+
+...for a new buildpack release that supports ${latest_tag}.
+-------------------------------------------------------------------
+EOF
+                panic "Aborting install due to new major release."
             ;;
         esac
     else
