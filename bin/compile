@@ -97,7 +97,7 @@ EOF
     local profile_dir="${BUILD_DIR}/.profile.d"
     mkdir --parent "${profile_dir}"
     cat <<EOF > "${profile_dir}/caddy.sh"
-export PATH="${bin_dir}:\${PATH}"
+export PATH="\${HOME}/.caddy/bin:\${PATH}"
 EOF
     chmod ugo=rx "${profile_dir}/caddy.sh"
 }
