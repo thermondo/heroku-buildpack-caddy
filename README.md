@@ -6,18 +6,23 @@ Built according to Heroku's [buildpack API](https://devcenter.heroku.com/article
 
 ## Quick Start
 
-Add the buildpack to your Heroku app:
+Get the `buildpack.tar.gz` download URL from [the latest release](https://github.com/thermondo/heroku-buildpack-caddy/releases/latest).
+It should look something like:
 
-```bash
-heroku buildpacks:add https://github.com/thermondo/heroku-buildpack-caddy/releases/download/v0.0.1/buildpack.tar.gz
+```plaintext
+https://github.com/thermondo/heroku-buildpack-caddy/releases/download/LATEST_VERSION_NUMBER/buildpack.tar.gz
 ```
 
-🚨 _It's highly recommended that you use the **release tarball** URL instead of the GitHub repo URL._
+Then run:
+
+```bash
+heroku buildpacks:add <the-buildpack-url>
+```
 
 Then in your app's [Procfile](https://devcenter.heroku.com/articles/procfile) add something like this:
 
 ```plaintext
-web: ./.caddy/bin/caddy --config <your Caddyfile>
+web: caddy --config <your Caddyfile>
 ```
 
 If you want to run a specific version of Caddy, set the `CADDY_RELEASE` environment variable on your
