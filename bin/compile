@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# https://devcenter.heroku.com/articles/buildpack-api#bin-compile
+
+BUILD_DIR="${1}"
+CACHE_DIR="${2}"
+# ENV_DIR="${3}"
+
+panic() {
+    echo "FATAL: ${*}" | indent
+    exit 1
+}
+
+step() {
+    echo "-----> ${*}"
+}
+
+info() {
+    echo "${*}" | indent
+}
+
+indent() {
+    sed 's/^/       /'
+}
+
+curl_download() {
+    local url="${1}"
+    curl --proto '=https' --tlsv1.2 \
+        --silent \
+        --show-error \
+        --fail \
+        --location "${url}"
+}
+
+github_latest_tag() {
+    local owner="${1}"
+    local repo="${2}"
+    curl_download "https://api.github.com/repos/${owner}/${repo}/releases/latest" \
+        | grep --perl-regexp --only-matching '(?<="tag_name": ")(\S+)(?=")'
+}
+
+main() {
+    local latest_tag latest_version download_path layer_dir caddy_url
+
+    if [ "${CADDY_RELEASE:-}" == "" ]; then
+        step "Asking GitHub for latest version of Caddy..."
+        latest_tag="$(github_latest_tag caddyserver caddy)"
+
+        # make sure we have a version of caddy we've tested with (currently 2.x)
+        case "${latest_tag}" in
+            v2.*)
+                info "Caddy version: ${latest_tag}"
+            ;;
+            *)
+                indent <<EOF
+-------------------------------------------------------------------
+Expected Caddy v2.x -- got ${latest_tag}.
+Rather that installing / running new major versions automatically,
+we're going to abort so you have an opportunity to test first. You
+can override this behavior by pinning the version you want with
+the CADDY_RELEASE environment variable. Also check...
+
+    https://github.com/thermondo/heroku-buildpack-caddy/
+
+...for a new buildpack release that supports ${latest_tag}.
+-------------------------------------------------------------------
+EOF
+                panic "Aborting install due to new major release."
+            ;;
+        esac
+    else
+        latest_tag="${CADDY_RELEASE}"
+    fi
+
+    mkdir --parent "${CACHE_DIR}"
+    download_path="${CACHE_DIR}/${latest_tag}.tar.gz"
+    if [ -f "${download_path}" ]; then
+        step "Found Caddy ${latest_tag} in download cache"
+    else
+        # strip the leading `v` from the tag name
+        latest_version="$(echo "${latest_tag}" | cut -c 2-)"
+        caddy_url="https://github.com/caddyserver/caddy/releases/download/${latest_tag}/caddy_${latest_version}_linux_amd64.tar.gz"
+        step "Downloading Caddy from ${caddy_url}..."
+        curl_download "${caddy_url}" > "${download_path}.tmp"
+        mv "${download_path}.tmp" "${download_path}"
+    fi
+
+    step "Extracting Caddy..."
+    layer_dir="${BUILD_DIR}/.caddy"
+    bin_dir="${layer_dir}/bin"
+    mkdir --parent "${bin_dir}"
+    (
+        umask ugo=r
+        tar --extract --gzip --to-stdout --file "${download_path}" "caddy" > "${bin_dir}/caddy"
+    )
+    chmod +x "${bin_dir}/caddy"
+    "${bin_dir}/caddy" --version | indent
+}
+
+main
