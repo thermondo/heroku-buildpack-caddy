@@ -90,12 +90,16 @@ EOF
     layer_dir="${BUILD_DIR}/.caddy"
     bin_dir="${layer_dir}/bin"
     mkdir --parent "${bin_dir}"
-    (
-        umask ugo=r
-        tar --extract --gzip --to-stdout --file "${download_path}" "caddy" > "${bin_dir}/caddy"
-    )
-    chmod +x "${bin_dir}/caddy"
-    "${bin_dir}/caddy" --version | indent
+    tar --extract --gzip --to-stdout --file "${download_path}" "caddy" > "${bin_dir}/caddy"
+    chmod ugo=rx "${bin_dir}/caddy"
+
+    step "Installing profile.d script"
+    local profile_dir="${BUILD_DIR}/.profile.d"
+    mkdir --parent "${profile_dir}"
+    cat <<EOF > "${profile_dir}/caddy.sh"
+export PATH="\${HOME}/.caddy/bin:\${PATH}"
+EOF
+    chmod ugo=rx "${profile_dir}/caddy.sh"
 }
 
 main
